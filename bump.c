@@ -1,4 +1,3 @@
-#include "grid/cartesian.h"
 #include "saint-venant.h"
 event init (t=0) {
  foreach()
@@ -9,10 +8,18 @@ stats s = statsf (h);
 fprintf (stderr, "%g %g %g\n", t, s.min, s.max);
 }
 event images (t += 4./300.){
-output_ppm (h);
+ scalar l[];
+ foreach()
+  l[] = level;
+ static FILE * fp = fopen ("grid.ppm", "w");
+ output_ppm (l, fp, min = 0, max = 8);
+ output_ppm (h, linear = true);
 }
 event end (t = 4) {
 printf ("i = %d t = %g\n", i, t);
+}
+event adapt (i++) {
+ adapt_wavelet ({h}, (double []){4e-3}, maxlevel = 8);
 }
 int main() {
 origin(-0.5, -0.5);
